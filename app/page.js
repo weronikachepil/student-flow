@@ -542,18 +542,18 @@ export default function HomePage() {
           <header className="hero">
             <div className="hero__content">
               <p className="eyebrow">Student Flow</p>
-              <h1>Простір групи, де староста керує процесом, а студенти бачать усе онлайн</h1>
+              <h1>Простір групи</h1>
               <p className="hero__text">
-                Після налаштування Supabase цим вже можна користуватись як реальним
-                сайтом: реєстрація, вхід, ролі, задачі, оголошення, посилання і розклад.
+                Один зручний простір для групи, де зібрані задачі, оголошення,
+                посилання і розклад.
               </p>
             </div>
             <aside className="hero__panel">
-              <p className="hero__panel-label">Що вже працює</p>
+              <p className="hero__panel-label">Можливості</p>
               <ul className="today-list">
-                <li>Реєстрація і вхід через Supabase Auth</li>
-                <li>Ролі старости і студента</li>
-                <li>Живі таблиці для задач, розкладу, оголошень і посилань</li>
+                <li>Задачі для групи і для себе</li>
+                <li>Оголошення і корисні посилання</li>
+                <li>Розклад, доступний для всіх</li>
               </ul>
             </aside>
           </header>
