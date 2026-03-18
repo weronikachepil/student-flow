@@ -55,9 +55,17 @@ create table if not exists public.schedule_entries (
   time_start time not null,
   subject text not null,
   room text not null default '',
+  group_label text not null default 'all' check (group_label in ('all', 'group1', 'group2')),
+  week_type text not null default 'both' check (week_type in ('both', 'numerator', 'denominator')),
   created_by uuid not null references public.profiles (id) on delete cascade,
   created_at timestamptz not null default now()
 );
+
+alter table public.schedule_entries
+  add column if not exists group_label text not null default 'all';
+
+alter table public.schedule_entries
+  add column if not exists week_type text not null default 'both';
 
 create or replace function public.handle_new_user()
 returns trigger

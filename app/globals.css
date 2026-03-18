@@ -458,6 +458,13 @@ textarea {
   word-break: break-word;
 }
 
+.schedule-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
 .button--small {
   padding: 10px 14px;
   font-size: 0.9rem;
@@ -558,7 +565,8 @@ textarea {
   }
 
   .task-board,
-  .schedule-board {
+  .schedule-board,
+  .schedule-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -582,7 +590,8 @@ textarea {
   .hero__stats,
   .grid-form,
   .task-board,
-  .schedule-board {
+  .schedule-board,
+  .schedule-filters {
     grid-template-columns: 1fr;
   }
 

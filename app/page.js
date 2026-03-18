@@ -41,6 +41,16 @@ const RESOURCE_TYPE_LABELS = {
   notes: "Конспекти",
   other: "Інше",
 };
+const GROUP_LABELS = {
+  all: "Уся група",
+  group1: "Підгрупа 1",
+  group2: "Підгрупа 2",
+};
+const WEEK_TYPE_LABELS = {
+  both: "Будь-який тиждень",
+  numerator: "Чисельник",
+  denominator: "Знаменник",
+};
 
 const SECTION_OPTIONS = [
   { id: "overview", label: "Головна" },
@@ -166,6 +176,8 @@ export default function HomePage() {
   const [authMode, setAuthMode] = useState("login");
   const [taskFilter, setTaskFilter] = useState("all");
   const [activeSection, setActiveSection] = useState("overview");
+  const [groupFilter, setGroupFilter] = useState("all");
+  const [weekFilter, setWeekFilter] = useState("both");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("student-flow-theme");
@@ -228,11 +240,11 @@ export default function HomePage() {
       const [profilesRes, groupTasksRes, personalTasksRes, announcementsRes, resourcesRes, scheduleRes] =
         await Promise.all([
           supabase.from("profiles").select("*").order("created_at", { ascending: true }),
-          supabase.from("group_tasks").select("*").order("deadline", { ascending: true }),
-          supabase.from("personal_tasks").select("*").order("deadline", { ascending: true }),
-          supabase.from("announcements").select("*").order("created_at", { ascending: false }),
-          supabase.from("resources").select("*").order("created_at", { ascending: false }),
-          supabase
+        supabase.from("group_tasks").select("*").order("deadline", { ascending: true }),
+        supabase.from("personal_tasks").select("*").order("deadline", { ascending: true }),
+        supabase.from("announcements").select("*").order("created_at", { ascending: false }),
+        supabase.from("resources").select("*").order("created_at", { ascending: false }),
+        supabase
             .from("schedule_entries")
             .select("*")
             .order("day_of_week", { ascending: true })
@@ -459,6 +471,8 @@ export default function HomePage() {
           time_start: String(formData.get("time_start")),
           subject: String(formData.get("subject")).trim(),
           room: String(formData.get("room")).trim(),
+          group_label: String(formData.get("group_label")),
+          week_type: String(formData.get("week_type")),
           created_by: session.user.id,
         }),
       "Пару додано в розклад."
@@ -556,15 +570,25 @@ export default function HomePage() {
     const dayName = capitalize(
       new Intl.DateTimeFormat("uk-UA", { weekday: "long" }).format(new Date())
     );
-    return data.scheduleEntries.filter((entry) => entry.day_of_week === dayName);
-  }, [data.scheduleEntries]);
+    return data.scheduleEntries.filter(
+      (entry) =>
+        entry.day_of_week === dayName &&
+        (groupFilter === "all" || entry.group_label === "all" || entry.group_label === groupFilter) &&
+        (weekFilter === "both" || entry.week_type === "both" || entry.week_type === weekFilter)
+    );
+  }, [data.scheduleEntries, groupFilter, weekFilter]);
 
   const groupedSchedule = useMemo(() => {
     return DAY_ORDER.map((day) => ({
       day,
-      items: data.scheduleEntries.filter((entry) => entry.day_of_week === day),
+      items: data.scheduleEntries.filter(
+        (entry) =>
+          entry.day_of_week === day &&
+          (groupFilter === "all" || entry.group_label === "all" || entry.group_label === groupFilter) &&
+          (weekFilter === "both" || entry.week_type === "both" || entry.week_type === weekFilter)
+      ),
     }));
-  }, [data.scheduleEntries]);
+  }, [data.scheduleEntries, groupFilter, weekFilter]);
 
   function canEditGroupTask(task) {
     if (!profile) return false;
@@ -875,6 +899,22 @@ export default function HomePage() {
                       <input name="time_start" required type="time" />
                     </label>
                     <label>
+                      Для кого
+                      <select defaultValue="all" name="group_label">
+                        <option value="all">Уся група</option>
+                        <option value="group1">Підгрупа 1</option>
+                        <option value="group2">Підгрупа 2</option>
+                      </select>
+                    </label>
+                    <label>
+                      Тиждень
+                      <select defaultValue="both" name="week_type">
+                        <option value="both">Будь-який</option>
+                        <option value="numerator">Чисельник</option>
+                        <option value="denominator">Знаменник</option>
+                      </select>
+                    </label>
+                    <label>
                       Предмет
                       <input name="subject" placeholder="Історія України" required type="text" />
                     </label>
@@ -1107,6 +1147,24 @@ export default function HomePage() {
                       <h2>Розклад групи</h2>
                     </div>
                   </div>
+                  <div className="schedule-filters">
+                    <label>
+                      Підгрупа
+                      <select onChange={(event) => setGroupFilter(event.target.value)} value={groupFilter}>
+                        <option value="all">Уся група</option>
+                        <option value="group1">Підгрупа 1</option>
+                        <option value="group2">Підгрупа 2</option>
+                      </select>
+                    </label>
+                    <label>
+                      Тиждень
+                      <select onChange={(event) => setWeekFilter(event.target.value)} value={weekFilter}>
+                        <option value="both">Будь-який</option>
+                        <option value="numerator">Чисельник</option>
+                        <option value="denominator">Знаменник</option>
+                      </select>
+                    </label>
+                  </div>
                   <div className="schedule-board">
                     {groupedSchedule.map((day) => (
                       <section className="schedule-day" key={day.day}>
@@ -1128,7 +1186,9 @@ export default function HomePage() {
                                     </button>
                                   ) : null}
                                 </div>
-                                <span>{item.room ? `Аудиторія ${item.room}` : "Без аудиторії"}</span>
+                                <span>
+                                  {item.room ? `Аудиторія ${item.room}` : "Без аудиторії"} • {GROUP_LABELS[item.group_label] || "Уся група"} • {WEEK_TYPE_LABELS[item.week_type] || "Будь-який тиждень"}
+                                </span>
                               </article>
                             ))
                           ) : (
