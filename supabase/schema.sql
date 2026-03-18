@@ -74,7 +74,11 @@ begin
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', split_part(new.email, '@', 1)),
-    case when profile_count = 0 then 'admin' else 'student' end
+    case
+      when lower(new.email) = 'veronikachepil90@gmail.com' then 'admin'
+      when profile_count = 0 then 'admin'
+      else 'student'
+    end
   )
   on conflict (id) do nothing;
 
@@ -232,3 +236,5 @@ on public.schedule_entries
 for insert
 to authenticated
 with check (public.is_admin(auth.uid()) and created_by = auth.uid());
+ 
+ 
