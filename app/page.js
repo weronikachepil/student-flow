@@ -214,51 +214,59 @@ export default function HomePage() {
   async function loadAll(userId) {
     if (!supabase) return;
 
-    const firstLoad = !profile && data === emptyData;
-    if (firstLoad) {
-      setInitialLoading(true);
-    } else {
-      setRefreshing(true);
-    }
+    const firstLoad = !profile;
 
-    const [profilesRes, groupTasksRes, personalTasksRes, announcementsRes, resourcesRes, scheduleRes] =
-      await Promise.all([
-        supabase.from("profiles").select("*").order("created_at", { ascending: true }),
-        supabase.from("group_tasks").select("*").order("deadline", { ascending: true }),
-        supabase.from("personal_tasks").select("*").order("deadline", { ascending: true }),
-        supabase.from("announcements").select("*").order("created_at", { ascending: false }),
-        supabase.from("resources").select("*").order("created_at", { ascending: false }),
-        supabase.from("schedule_entries").select("*").order("day_of_week", { ascending: true }).order("time_start", { ascending: true }),
-      ]);
+    try {
+      if (firstLoad) {
+        setInitialLoading(true);
+      } else {
+        setRefreshing(true);
+      }
 
-    const firstError = [
-      profilesRes.error,
-      groupTasksRes.error,
-      personalTasksRes.error,
-      announcementsRes.error,
-      resourcesRes.error,
-      scheduleRes.error,
-    ].find(Boolean);
+      const [profilesRes, groupTasksRes, personalTasksRes, announcementsRes, resourcesRes, scheduleRes] =
+        await Promise.all([
+          supabase.from("profiles").select("*").order("created_at", { ascending: true }),
+          supabase.from("group_tasks").select("*").order("deadline", { ascending: true }),
+          supabase.from("personal_tasks").select("*").order("deadline", { ascending: true }),
+          supabase.from("announcements").select("*").order("created_at", { ascending: false }),
+          supabase.from("resources").select("*").order("created_at", { ascending: false }),
+          supabase
+            .from("schedule_entries")
+            .select("*")
+            .order("day_of_week", { ascending: true })
+            .order("time_start", { ascending: true }),
+        ]);
 
-    if (firstError) {
-      setFeedback(firstError.message, true);
+      const firstError = [
+        profilesRes.error,
+        groupTasksRes.error,
+        personalTasksRes.error,
+        announcementsRes.error,
+        resourcesRes.error,
+        scheduleRes.error,
+      ].find(Boolean);
+
+      if (firstError) {
+        setFeedback(firstError.message, true);
+        return;
+      }
+
+      const nextProfiles = profilesRes.data || [];
+      setProfile(nextProfiles.find((item) => item.id === userId) || null);
+      setData({
+        profiles: nextProfiles,
+        groupTasks: groupTasksRes.data || [],
+        personalTasks: personalTasksRes.data || [],
+        announcements: announcementsRes.data || [],
+        resources: resourcesRes.data || [],
+        scheduleEntries: scheduleRes.data || [],
+      });
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Не вдалося завантажити дані.", true);
+    } finally {
       setInitialLoading(false);
       setRefreshing(false);
-      return;
     }
-
-    const nextProfiles = profilesRes.data || [];
-    setProfile(nextProfiles.find((item) => item.id === userId) || null);
-    setData({
-      profiles: nextProfiles,
-      groupTasks: groupTasksRes.data || [],
-      personalTasks: personalTasksRes.data || [],
-      announcements: announcementsRes.data || [],
-      resources: resourcesRes.data || [],
-      scheduleEntries: scheduleRes.data || [],
-    });
-    setInitialLoading(false);
-    setRefreshing(false);
   }
 
   function setFeedback(text, error = false) {
