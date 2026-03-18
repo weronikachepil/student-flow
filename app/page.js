@@ -296,7 +296,20 @@ export default function HomePage() {
 
   async function handleLogout() {
     if (!supabase) return;
-    await supabase.auth.signOut();
+    setBusy(true);
+    setFeedback("");
+
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+
+    setSession(null);
+    setProfile(null);
+    setData(emptyData);
+    setLoading(false);
+    setBusy(false);
+
+    if (error) {
+      setFeedback("Сесію локально очищено. Якщо сторінка не оновилась, просто перезавантаж її.");
+    }
   }
 
   async function withRefresh(action, successText) {
