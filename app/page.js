@@ -157,7 +157,8 @@ export default function HomePage() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [data, setData] = useState(emptyData);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
@@ -179,7 +180,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!supabase) {
-      setLoading(false);
+      setInitialLoading(false);
       return undefined;
     }
 
@@ -189,7 +190,7 @@ export default function HomePage() {
       if (activeSession?.user) {
         await loadAll(activeSession.user.id);
       } else {
-        setLoading(false);
+        setInitialLoading(false);
       }
     });
 
@@ -202,7 +203,8 @@ export default function HomePage() {
       } else {
         setProfile(null);
         setData(emptyData);
-        setLoading(false);
+        setInitialLoading(false);
+        setRefreshing(false);
       }
     });
 
@@ -212,7 +214,12 @@ export default function HomePage() {
   async function loadAll(userId) {
     if (!supabase) return;
 
-    setLoading(true);
+    const firstLoad = !profile && data === emptyData;
+    if (firstLoad) {
+      setInitialLoading(true);
+    } else {
+      setRefreshing(true);
+    }
 
     const [profilesRes, groupTasksRes, personalTasksRes, announcementsRes, resourcesRes, scheduleRes] =
       await Promise.all([
@@ -235,7 +242,8 @@ export default function HomePage() {
 
     if (firstError) {
       setFeedback(firstError.message, true);
-      setLoading(false);
+      setInitialLoading(false);
+      setRefreshing(false);
       return;
     }
 
@@ -249,7 +257,8 @@ export default function HomePage() {
       resources: resourcesRes.data || [],
       scheduleEntries: scheduleRes.data || [],
     });
-    setLoading(false);
+    setInitialLoading(false);
+    setRefreshing(false);
   }
 
   function setFeedback(text, error = false) {
@@ -314,7 +323,8 @@ export default function HomePage() {
     setSession(null);
     setProfile(null);
     setData(emptyData);
-    setLoading(false);
+    setInitialLoading(false);
+    setRefreshing(false);
     setBusy(false);
 
     if (error) {
@@ -699,8 +709,9 @@ export default function HomePage() {
           </nav>
 
           {message ? <p className={`message ${isError ? "is-error" : "is-success"}`}>{message}</p> : null}
+          {refreshing ? <p className="message">Оновлюю дані...</p> : null}
 
-          {loading ? (
+          {initialLoading ? (
             <section className="card">
               <p>Завантажую дані...</p>
             </section>
