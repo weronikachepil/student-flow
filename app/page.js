@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 
 const DAY_ORDER = [
@@ -153,6 +153,7 @@ function TaskBoard({ tasks, canEditTask, onToggleComplete, onStatusChange, onDel
 
 export default function HomePage() {
   const [supabase] = useState(() => getSupabaseClient());
+  const hasLoadedOnceRef = useRef(false);
   const [theme, setTheme] = useState("light");
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -203,6 +204,7 @@ export default function HomePage() {
       } else {
         setProfile(null);
         setData(emptyData);
+        hasLoadedOnceRef.current = false;
         setInitialLoading(false);
         setRefreshing(false);
       }
@@ -214,7 +216,7 @@ export default function HomePage() {
   async function loadAll(userId) {
     if (!supabase) return;
 
-    const firstLoad = !profile;
+    const firstLoad = !hasLoadedOnceRef.current;
 
     try {
       if (firstLoad) {
@@ -261,6 +263,7 @@ export default function HomePage() {
         resources: resourcesRes.data || [],
         scheduleEntries: scheduleRes.data || [],
       });
+      hasLoadedOnceRef.current = true;
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Не вдалося завантажити дані.", true);
     } finally {
@@ -331,6 +334,7 @@ export default function HomePage() {
     setSession(null);
     setProfile(null);
     setData(emptyData);
+    hasLoadedOnceRef.current = false;
     setInitialLoading(false);
     setRefreshing(false);
     setBusy(false);
