@@ -473,6 +473,58 @@ textarea {
   font-weight: 700;
 }
 
+.section-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.section-nav__button {
+  border: 1px solid rgba(82, 65, 48, 0.14);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 12px 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.section-nav__button.is-active {
+  background: linear-gradient(135deg, var(--primary), #dd8e56);
+  color: white;
+  border-color: transparent;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.overview-item {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(82, 65, 48, 0.08);
+}
+
+.overview-item strong {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.overview-item p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.quick-links {
+  display: grid;
+  gap: 12px;
+}
+
 .message.is-error {
   color: var(--red);
 }
@@ -495,6 +547,10 @@ textarea {
   .task-board,
   .schedule-board {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
   }
 }
 

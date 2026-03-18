@@ -42,6 +42,15 @@ const RESOURCE_TYPE_LABELS = {
   other: "Інше",
 };
 
+const SECTION_OPTIONS = [
+  { id: "overview", label: "Головна" },
+  { id: "tasks", label: "Завдання" },
+  { id: "announcements", label: "Оголошення" },
+  { id: "resources", label: "Посилання" },
+  { id: "schedule", label: "Розклад" },
+  { id: "planner", label: "Мій планер" },
+];
+
 const emptyData = {
   profiles: [],
   groupTasks: [],
@@ -154,6 +163,7 @@ export default function HomePage() {
   const [isError, setIsError] = useState(false);
   const [authMode, setAuthMode] = useState("login");
   const [taskFilter, setTaskFilter] = useState("all");
+  const [activeSection, setActiveSection] = useState("overview");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("student-flow-theme");
@@ -675,6 +685,19 @@ export default function HomePage() {
             </aside>
           </header>
 
+          <nav className="section-nav">
+            {SECTION_OPTIONS.map((section) => (
+              <button
+                key={section.id}
+                className={`section-nav__button ${activeSection === section.id ? "is-active" : ""}`}
+                onClick={() => setActiveSection(section.id)}
+                type="button"
+              >
+                {section.label}
+              </button>
+            ))}
+          </nav>
+
           {message ? <p className={`message ${isError ? "is-error" : "is-success"}`}>{message}</p> : null}
 
           {loading ? (
@@ -683,7 +706,58 @@ export default function HomePage() {
             </section>
           ) : (
             <section className="dashboard">
-              {isAdmin ? (
+              {activeSection === "overview" ? (
+                <>
+                  <section className="card card--wide">
+                    <div className="card__header">
+                      <div>
+                        <p className="section-tag">Огляд</p>
+                        <h2>Що зараз важливо</h2>
+                      </div>
+                    </div>
+                    <div className="overview-grid">
+                      <article className="overview-item">
+                        <strong>{stats.total}</strong>
+                        <p>Усього видимих задач для тебе зараз.</p>
+                      </article>
+                      <article className="overview-item">
+                        <strong>{stats.urgent}</strong>
+                        <p>Горять цього тижня і потребують уваги.</p>
+                      </article>
+                      <article className="overview-item">
+                        <strong>{data.announcements.length}</strong>
+                        <p>Актуальних оголошень від старости.</p>
+                      </article>
+                      <article className="overview-item">
+                        <strong>{todaySchedule.length}</strong>
+                        <p>Пар заплановано на сьогодні.</p>
+                      </article>
+                    </div>
+                  </section>
+
+                  <section className="card">
+                    <div className="card__header">
+                      <div>
+                        <p className="section-tag">Швидкий доступ</p>
+                        <h2>Основне</h2>
+                      </div>
+                    </div>
+                    <div className="quick-links">
+                      <button className="button button--ghost" onClick={() => setActiveSection("tasks")} type="button">
+                        До задач
+                      </button>
+                      <button className="button button--ghost" onClick={() => setActiveSection("announcements")} type="button">
+                        До оголошень
+                      </button>
+                      <button className="button button--ghost" onClick={() => setActiveSection("schedule")} type="button">
+                        До розкладу
+                      </button>
+                    </div>
+                  </section>
+                </>
+              ) : null}
+
+              {activeSection === "tasks" && isAdmin ? (
                 <section className="card card--wide">
                   <div className="card__header">
                     <div>
@@ -742,7 +816,7 @@ export default function HomePage() {
                 </section>
               ) : null}
 
-              {isAdmin ? (
+              {activeSection === "schedule" && isAdmin ? (
                 <section className="card">
                   <div className="card__header">
                     <div>
@@ -780,7 +854,7 @@ export default function HomePage() {
                 </section>
               ) : null}
 
-              {isAdmin ? (
+              {activeSection === "announcements" && isAdmin ? (
                 <section className="card">
                   <div className="card__header">
                     <div>
@@ -804,34 +878,36 @@ export default function HomePage() {
                 </section>
               ) : null}
 
-              <section className="card">
-                <div className="card__header">
-                  <div>
-                    <p className="section-tag">Група</p>
-                    <h2>Оголошення</h2>
+              {activeSection === "announcements" ? (
+                <section className="card card--wide">
+                  <div className="card__header">
+                    <div>
+                      <p className="section-tag">Група</p>
+                      <h2>Оголошення</h2>
+                    </div>
                   </div>
-                </div>
-                <div className="announcement-list">
-                  {data.announcements.length ? (
-                    data.announcements.map((item) => {
-                      const author = data.profiles.find((profileItem) => profileItem.id === item.created_by);
-                      return (
-                        <article className="announcement-item" key={item.id}>
-                          <h3>{item.title}</h3>
-                          <p className="announcement-item__meta">
-                            {formatDateTime(item.created_at)} • {author?.full_name || "Староста"}
-                          </p>
-                          <p>{item.content}</p>
-                        </article>
-                      );
-                    })
-                  ) : (
-                    <div className="empty-state">Поки немає оголошень.</div>
-                  )}
-                </div>
-              </section>
+                  <div className="announcement-list">
+                    {data.announcements.length ? (
+                      data.announcements.map((item) => {
+                        const author = data.profiles.find((profileItem) => profileItem.id === item.created_by);
+                        return (
+                          <article className="announcement-item" key={item.id}>
+                            <h3>{item.title}</h3>
+                            <p className="announcement-item__meta">
+                              {formatDateTime(item.created_at)} • {author?.full_name || "Староста"}
+                            </p>
+                            <p>{item.content}</p>
+                          </article>
+                        );
+                      })
+                    ) : (
+                      <div className="empty-state">Поки немає оголошень.</div>
+                    )}
+                  </div>
+                </section>
+              ) : null}
 
-              {isAdmin ? (
+              {activeSection === "resources" && isAdmin ? (
                 <section className="card">
                   <div className="card__header">
                     <div>
@@ -865,141 +941,149 @@ export default function HomePage() {
                 </section>
               ) : null}
 
-              <section className="card">
-                <div className="card__header">
-                  <div>
-                    <p className="section-tag">Група</p>
-                    <h2>Корисні посилання</h2>
+              {activeSection === "resources" ? (
+                <section className="card card--wide">
+                  <div className="card__header">
+                    <div>
+                      <p className="section-tag">Група</p>
+                      <h2>Корисні посилання</h2>
+                    </div>
                   </div>
-                </div>
-                <div className="resource-list">
-                  {data.resources.length ? (
-                    data.resources.map((item) => (
-                      <article className="resource-item" key={item.id}>
-                        <h3>{item.title}</h3>
-                        <p className="resource-item__meta">{RESOURCE_TYPE_LABELS[item.type] || "Ресурс"}</p>
-                        <p>
-                          <a href={item.url} rel="noreferrer" target="_blank">
-                            {item.url}
-                          </a>
-                        </p>
-                      </article>
-                    ))
-                  ) : (
-                    <div className="empty-state">Поки немає доданих посилань.</div>
-                  )}
-                </div>
-              </section>
+                  <div className="resource-list">
+                    {data.resources.length ? (
+                      data.resources.map((item) => (
+                        <article className="resource-item" key={item.id}>
+                          <h3>{item.title}</h3>
+                          <p className="resource-item__meta">{RESOURCE_TYPE_LABELS[item.type] || "Ресурс"}</p>
+                          <p>
+                            <a href={item.url} rel="noreferrer" target="_blank">
+                              {item.url}
+                            </a>
+                          </p>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="empty-state">Поки немає доданих посилань.</div>
+                    )}
+                  </div>
+                </section>
+              ) : null}
 
-              <section className="card card--wide">
-                <div className="card__header">
-                  <div>
-                    <p className="section-tag">Групові задачі</p>
-                    <h2>Task Board</h2>
-                  </div>
-                  <select onChange={(event) => setTaskFilter(event.target.value)} value={taskFilter}>
-                    <option value="all">Усі</option>
-                    <option value="urgent">Термінові</option>
-                    <option value="completed">Виконані</option>
-                    <option value="active">Активні</option>
-                    <option value="mine">Призначені конкретно комусь</option>
-                  </select>
-                </div>
-                <TaskBoard
-                  canEditTask={canEditGroupTask}
-                  getAssigneeLabel={assigneeLabel}
-                  onDelete={isAdmin ? deleteGroupTask : null}
-                  onStatusChange={(task, status) => updateGroupTask(task, { status })}
-                  onToggleComplete={(task, checked) =>
-                    updateGroupTask(task, { status: checked ? "done" : fallbackStatus(task.status) })
-                  }
-                  tasks={filteredGroupTasks}
-                />
-              </section>
-
-              <section className="card card--wide">
-                <div className="card__header">
-                  <div>
-                    <p className="section-tag">Особисте</p>
-                    <h2>Мій планер</h2>
-                  </div>
-                </div>
-                <form className="grid-form" onSubmit={createPersonalTask}>
-                  <label>
-                    Що треба зробити
-                    <input name="title" placeholder="Підготуватися до модулю" required type="text" />
-                  </label>
-                  <label>
-                    Дедлайн
-                    <input name="deadline" required type="date" />
-                  </label>
-                  <label>
-                    Пріоритет
-                    <select defaultValue="medium" name="priority">
-                      <option value="high">Високий</option>
-                      <option value="medium">Середній</option>
-                      <option value="low">Низький</option>
+              {activeSection === "tasks" ? (
+                <section className="card card--wide">
+                  <div className="card__header">
+                    <div>
+                      <p className="section-tag">Групові задачі</p>
+                      <h2>Task Board</h2>
+                    </div>
+                    <select onChange={(event) => setTaskFilter(event.target.value)} value={taskFilter}>
+                      <option value="all">Усі</option>
+                      <option value="urgent">Термінові</option>
+                      <option value="completed">Виконані</option>
+                      <option value="active">Активні</option>
+                      <option value="mine">Призначені конкретно комусь</option>
                     </select>
-                  </label>
-                  <label>
-                    Статус
-                    <select defaultValue="todo" name="status">
-                      <option value="todo">Треба зробити</option>
-                      <option value="inprogress">В процесі</option>
-                      <option value="done">Готово</option>
-                    </select>
-                  </label>
-                  <label className="grid-form__full">
-                    Коментар
-                    <textarea name="details" placeholder="Кроки для себе" rows="3" />
-                  </label>
-                  <button className="button button--primary" disabled={busy} type="submit">
-                    Додати в особистий план
-                  </button>
-                </form>
-                <TaskBoard
-                  canEditTask={() => true}
-                  onDelete={deletePersonalTask}
-                  onStatusChange={(task, status) => updatePersonalTask(task, { status })}
-                  onToggleComplete={(task, checked) =>
-                    updatePersonalTask(task, { status: checked ? "done" : fallbackStatus(task.status) })
-                  }
-                  tasks={personalTasks}
-                />
-              </section>
-
-              <section className="card card--wide">
-                <div className="card__header">
-                  <div>
-                    <p className="section-tag">Тиждень</p>
-                    <h2>Розклад групи</h2>
                   </div>
-                </div>
-                <div className="schedule-board">
-                  {groupedSchedule.map((day) => (
-                    <section className="schedule-day" key={day.day}>
-                      <div className="schedule-day__header">
-                        <h3>{day.day}</h3>
-                        <span>{day.items.length} пар</span>
-                      </div>
-                      <div className="schedule-day__items">
-                        {day.items.length ? (
-                          day.items.map((item) => (
-                            <article className="schedule-slot" key={item.id}>
-                              <strong>
-                                {item.time_start} • {item.subject}
-                              </strong>
-                              <span>{item.room ? `Аудиторія ${item.room}` : "Без аудиторії"}</span>
-                            </article>
-                          ))
-                        ) : (
-                          <div className="empty-state">Вільно</div>
-                        )}
-                      </div>
-                    </section>
-                  ))}
-                </div>
-              </section>
+                  <TaskBoard
+                    canEditTask={canEditGroupTask}
+                    getAssigneeLabel={assigneeLabel}
+                    onDelete={isAdmin ? deleteGroupTask : null}
+                    onStatusChange={(task, status) => updateGroupTask(task, { status })}
+                    onToggleComplete={(task, checked) =>
+                      updateGroupTask(task, { status: checked ? "done" : fallbackStatus(task.status) })
+                    }
+                    tasks={filteredGroupTasks}
+                  />
+                </section>
+              ) : null}
+
+              {activeSection === "planner" ? (
+                <section className="card card--wide">
+                  <div className="card__header">
+                    <div>
+                      <p className="section-tag">Особисте</p>
+                      <h2>Мій планер</h2>
+                    </div>
+                  </div>
+                  <form className="grid-form" onSubmit={createPersonalTask}>
+                    <label>
+                      Що треба зробити
+                      <input name="title" placeholder="Підготуватися до модулю" required type="text" />
+                    </label>
+                    <label>
+                      Дедлайн
+                      <input name="deadline" required type="date" />
+                    </label>
+                    <label>
+                      Пріоритет
+                      <select defaultValue="medium" name="priority">
+                        <option value="high">Високий</option>
+                        <option value="medium">Середній</option>
+                        <option value="low">Низький</option>
+                      </select>
+                    </label>
+                    <label>
+                      Статус
+                      <select defaultValue="todo" name="status">
+                        <option value="todo">Треба зробити</option>
+                        <option value="inprogress">В процесі</option>
+                        <option value="done">Готово</option>
+                      </select>
+                    </label>
+                    <label className="grid-form__full">
+                      Коментар
+                      <textarea name="details" placeholder="Кроки для себе" rows="3" />
+                    </label>
+                    <button className="button button--primary" disabled={busy} type="submit">
+                      Додати в особистий план
+                    </button>
+                  </form>
+                  <TaskBoard
+                    canEditTask={() => true}
+                    onDelete={deletePersonalTask}
+                    onStatusChange={(task, status) => updatePersonalTask(task, { status })}
+                    onToggleComplete={(task, checked) =>
+                      updatePersonalTask(task, { status: checked ? "done" : fallbackStatus(task.status) })
+                    }
+                    tasks={personalTasks}
+                  />
+                </section>
+              ) : null}
+
+              {activeSection === "schedule" ? (
+                <section className="card card--wide">
+                  <div className="card__header">
+                    <div>
+                      <p className="section-tag">Тиждень</p>
+                      <h2>Розклад групи</h2>
+                    </div>
+                  </div>
+                  <div className="schedule-board">
+                    {groupedSchedule.map((day) => (
+                      <section className="schedule-day" key={day.day}>
+                        <div className="schedule-day__header">
+                          <h3>{day.day}</h3>
+                          <span>{day.items.length} пар</span>
+                        </div>
+                        <div className="schedule-day__items">
+                          {day.items.length ? (
+                            day.items.map((item) => (
+                              <article className="schedule-slot" key={item.id}>
+                                <strong>
+                                  {item.time_start} • {item.subject}
+                                </strong>
+                                <span>{item.room ? `Аудиторія ${item.room}` : "Без аудиторії"}</span>
+                              </article>
+                            ))
+                          ) : (
+                            <div className="empty-state">Вільно</div>
+                          )}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
             </section>
           )}
         </section>
