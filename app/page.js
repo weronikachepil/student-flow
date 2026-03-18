@@ -51,6 +51,16 @@ const WEEK_TYPE_LABELS = {
   numerator: "Чисельник",
   denominator: "Знаменник",
 };
+const GROUP_TARGET_OPTIONS = [
+  { value: "all", label: "Уся група" },
+  { value: "group1", label: "Підгрупа 1" },
+  { value: "group2", label: "Підгрупа 2" },
+];
+const WEEK_TARGET_OPTIONS = [
+  { value: "both", label: "Будь-який тиждень" },
+  { value: "numerator", label: "Чисельник" },
+  { value: "denominator", label: "Знаменник" },
+];
 
 const SECTION_OPTIONS = [
   { id: "overview", label: "Головна" },
@@ -463,19 +473,27 @@ export default function HomePage() {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
+    const groupTargets = normalizeScheduleTargets(formData.getAll("group_targets"), "all");
+    const weekTargets = normalizeScheduleTargets(formData.getAll("week_targets"), "both");
+    const entries = [];
 
-    await withRefresh(
-      () =>
-        supabase.from("schedule_entries").insert({
+    groupTargets.forEach((groupLabel) => {
+      weekTargets.forEach((weekType) => {
+        entries.push({
           day_of_week: String(formData.get("day_of_week")),
           time_start: String(formData.get("time_start")),
           subject: String(formData.get("subject")).trim(),
           room: String(formData.get("room")).trim(),
-          group_label: String(formData.get("group_label")),
-          week_type: String(formData.get("week_type")),
+          group_label: groupLabel,
+          week_type: weekType,
           created_by: session.user.id,
-        }),
-      "Пару додано в розклад."
+        });
+      });
+    });
+
+    await withRefresh(
+      () => supabase.from("schedule_entries").insert(entries),
+      entries.length === 1 ? "Пару додано в розклад." : `У розклад додано ${entries.length} варіанти(-ів).`
     );
 
     form.reset();
@@ -898,22 +916,38 @@ export default function HomePage() {
                       Час
                       <input name="time_start" required type="time" />
                     </label>
-                    <label>
-                      Для кого
-                      <select defaultValue="all" name="group_label">
-                        <option value="all">Уся група</option>
-                        <option value="group1">Підгрупа 1</option>
-                        <option value="group2">Підгрупа 2</option>
-                      </select>
-                    </label>
-                    <label>
-                      Тиждень
-                      <select defaultValue="both" name="week_type">
-                        <option value="both">Будь-який</option>
-                        <option value="numerator">Чисельник</option>
-                        <option value="denominator">Знаменник</option>
-                      </select>
-                    </label>
+                    <fieldset className="choice-group">
+                      <legend>Для кого</legend>
+                      <div className="choice-grid">
+                        {GROUP_TARGET_OPTIONS.map((option) => (
+                          <label className="choice-pill" key={option.value}>
+                            <input
+                              defaultChecked={option.value === "all"}
+                              name="group_targets"
+                              type="checkbox"
+                              value={option.value}
+                            />
+                            <span>{option.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                    <fieldset className="choice-group">
+                      <legend>Тиждень</legend>
+                      <div className="choice-grid">
+                        {WEEK_TARGET_OPTIONS.map((option) => (
+                          <label className="choice-pill" key={option.value}>
+                            <input
+                              defaultChecked={option.value === "both"}
+                              name="week_targets"
+                              type="checkbox"
+                              value={option.value}
+                            />
+                            <span>{option.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
                     <label>
                       Предмет
                       <input name="subject" placeholder="Історія України" required type="text" />
@@ -922,6 +956,9 @@ export default function HomePage() {
                       Аудиторія
                       <input name="room" placeholder="215" type="text" />
                     </label>
+                    <p className="form-hint">
+                      Можна вибрати одразу кілька підгруп і кілька типів тижня. Сайт сам створить усі потрібні варіанти.
+                    </p>
                     <button className="button" disabled={busy} type="submit">
                       Додати в розклад
                     </button>
@@ -1240,6 +1277,16 @@ function formatDeadline(dateString) {
 
 function fallbackStatus(status) {
   return status === "done" ? "todo" : status || "todo";
+}
+
+function normalizeScheduleTargets(values, fallbackValue) {
+  const nextValues = values.map((value) => String(value));
+
+  if (!nextValues.length || nextValues.includes(fallbackValue)) {
+    return [fallbackValue];
+  }
+
+  return [...new Set(nextValues)];
 }
 
 function capitalize(value) {
