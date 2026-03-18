@@ -372,6 +372,13 @@ textarea {
   justify-content: space-between;
 }
 
+.content-item__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .task-checkbox {
   position: relative;
   display: inline-flex;
@@ -449,6 +456,12 @@ textarea {
   font-weight: 800;
   text-decoration: none;
   word-break: break-word;
+}
+
+.button--small {
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 .schedule-board {
@@ -575,7 +588,8 @@ textarea {
 
   .topbar,
   .topbar__actions,
-  .task-item__actions {
+  .task-item__actions,
+  .content-item__header {
     flex-direction: column;
     align-items: stretch;
   }

@@ -489,6 +489,18 @@ export default function HomePage() {
     await withRefresh(() => supabase.from("personal_tasks").delete().eq("id", task.id), "Особисте завдання видалено.");
   }
 
+  async function deleteAnnouncement(item) {
+    await withRefresh(() => supabase.from("announcements").delete().eq("id", item.id), "Оголошення видалено.");
+  }
+
+  async function deleteResource(item) {
+    await withRefresh(() => supabase.from("resources").delete().eq("id", item.id), "Посилання видалено.");
+  }
+
+  async function deleteScheduleEntry(item) {
+    await withRefresh(() => supabase.from("schedule_entries").delete().eq("id", item.id), "Пару видалено з розкладу.");
+  }
+
   const isAdmin = profile?.role === "admin";
 
   const students = useMemo(
@@ -915,7 +927,14 @@ export default function HomePage() {
                         const author = data.profiles.find((profileItem) => profileItem.id === item.created_by);
                         return (
                           <article className="announcement-item" key={item.id}>
-                            <h3>{item.title}</h3>
+                            <div className="content-item__header">
+                              <h3>{item.title}</h3>
+                              {isAdmin ? (
+                                <button className="button button--ghost button--danger button--small" onClick={() => deleteAnnouncement(item)} type="button">
+                                  Видалити
+                                </button>
+                              ) : null}
+                            </div>
                             <p className="announcement-item__meta">
                               {formatDateTime(item.created_at)} • {author?.full_name || "Староста"}
                             </p>
@@ -976,7 +995,14 @@ export default function HomePage() {
                     {data.resources.length ? (
                       data.resources.map((item) => (
                         <article className="resource-item" key={item.id}>
-                          <h3>{item.title}</h3>
+                          <div className="content-item__header">
+                            <h3>{item.title}</h3>
+                            {isAdmin ? (
+                              <button className="button button--ghost button--danger button--small" onClick={() => deleteResource(item)} type="button">
+                                Видалити
+                              </button>
+                            ) : null}
+                          </div>
                           <p className="resource-item__meta">{RESOURCE_TYPE_LABELS[item.type] || "Ресурс"}</p>
                           <p>
                             <a href={item.url} rel="noreferrer" target="_blank">
@@ -1092,9 +1118,16 @@ export default function HomePage() {
                           {day.items.length ? (
                             day.items.map((item) => (
                               <article className="schedule-slot" key={item.id}>
-                                <strong>
-                                  {item.time_start} • {item.subject}
-                                </strong>
+                                <div className="content-item__header">
+                                  <strong>
+                                    {item.time_start} • {item.subject}
+                                  </strong>
+                                  {isAdmin ? (
+                                    <button className="button button--ghost button--danger button--small" onClick={() => deleteScheduleEntry(item)} type="button">
+                                      Видалити
+                                    </button>
+                                  ) : null}
+                                </div>
                                 <span>{item.room ? `Аудиторія ${item.room}` : "Без аудиторії"}</span>
                               </article>
                             ))

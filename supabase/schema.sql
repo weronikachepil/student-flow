@@ -209,6 +209,13 @@ for insert
 to authenticated
 with check (public.is_admin(auth.uid()) and created_by = auth.uid());
 
+drop policy if exists "announcements_delete_admin" on public.announcements;
+create policy "announcements_delete_admin"
+on public.announcements
+for delete
+to authenticated
+using (public.is_admin(auth.uid()));
+
 drop policy if exists "resources_read_all" on public.resources;
 create policy "resources_read_all"
 on public.resources
@@ -223,6 +230,13 @@ for insert
 to authenticated
 with check (public.is_admin(auth.uid()) and created_by = auth.uid());
 
+drop policy if exists "resources_delete_admin" on public.resources;
+create policy "resources_delete_admin"
+on public.resources
+for delete
+to authenticated
+using (public.is_admin(auth.uid()));
+
 drop policy if exists "schedule_read_all" on public.schedule_entries;
 create policy "schedule_read_all"
 on public.schedule_entries
@@ -236,5 +250,12 @@ on public.schedule_entries
 for insert
 to authenticated
 with check (public.is_admin(auth.uid()) and created_by = auth.uid());
+
+drop policy if exists "schedule_delete_admin" on public.schedule_entries;
+create policy "schedule_delete_admin"
+on public.schedule_entries
+for delete
+to authenticated
+using (public.is_admin(auth.uid()));
  
  
