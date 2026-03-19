@@ -21,25 +21,25 @@
 }
 
 body[data-theme="dark"] {
-  --bg: #191715;
-  --bg-accent: #26211d;
-  --bg-deep: #100f0d;
-  --surface: rgba(34, 30, 26, 0.88);
-  --surface-strong: rgba(42, 36, 31, 0.96);
-  --surface-soft: rgba(29, 25, 22, 0.92);
-  --text: #f2ede6;
-  --muted: #b8aea1;
-  --line: rgba(255, 255, 255, 0.08);
-  --primary: #f0a66d;
-  --primary-dark: #ffd2ad;
-  --primary-soft: rgba(240, 166, 109, 0.16);
-  --green: #8ec091;
-  --yellow: #f0c16f;
-  --red: #ef8d85;
-  --shadow: 24px 24px 48px rgba(8, 7, 6, 0.5), -16px -16px 36px rgba(53, 45, 38, 0.45);
-  --shadow-soft: 12px 12px 24px rgba(10, 9, 8, 0.35), -10px -10px 22px rgba(56, 48, 40, 0.32);
-  --shadow-inset: inset 8px 8px 18px rgba(14, 12, 11, 0.72), inset -8px -8px 18px rgba(51, 43, 36, 0.78);
-  --glow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 22px 40px rgba(240, 166, 109, 0.12);
+  --bg: #151618;
+  --bg-accent: #1e2125;
+  --bg-deep: #0d0f12;
+  --surface: rgba(31, 34, 38, 0.94);
+  --surface-strong: rgba(40, 44, 49, 0.98);
+  --surface-soft: rgba(24, 27, 31, 0.96);
+  --text: #f7f3ee;
+  --muted: #c2b9ae;
+  --line: rgba(255, 255, 255, 0.12);
+  --primary: #f2a565;
+  --primary-dark: #ffd3af;
+  --primary-soft: rgba(242, 165, 101, 0.22);
+  --green: #96c897;
+  --yellow: #f0c879;
+  --red: #f0928b;
+  --shadow: 24px 24px 52px rgba(4, 5, 7, 0.56), -14px -14px 34px rgba(57, 63, 70, 0.26);
+  --shadow-soft: 14px 14px 28px rgba(3, 4, 6, 0.46), -8px -8px 22px rgba(63, 70, 78, 0.22);
+  --shadow-inset: inset 8px 8px 18px rgba(9, 10, 12, 0.78), inset -8px -8px 18px rgba(53, 59, 66, 0.38);
+  --glow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 24px 40px rgba(242, 165, 101, 0.14);
 }
 
 * {
@@ -311,6 +311,23 @@ textarea {
   margin: 10px 0 16px;
   font-size: 2.15rem;
   line-height: 0.95;
+}
+
+.today-toolbar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.today-toolbar__field {
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.today-toolbar__field span {
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .today-list {
@@ -658,6 +675,13 @@ textarea {
   max-width: 100%;
 }
 
+.section-nav--top {
+  position: sticky;
+  top: 14px;
+  z-index: 10;
+  margin-bottom: 16px;
+}
+
 .section-nav__button {
   border: 1px solid rgba(255, 255, 255, 0.7);
   background: linear-gradient(145deg, rgba(249, 246, 242, 0.92), rgba(231, 225, 217, 0.88));
@@ -714,6 +738,78 @@ textarea {
 
 .message.is-success {
   color: var(--green);
+}
+
+body[data-theme="dark"] .topbar,
+body[data-theme="dark"] .section-nav,
+body[data-theme="dark"] .user-badge,
+body[data-theme="dark"] .hero__stats article,
+body[data-theme="dark"] .hero__panel,
+body[data-theme="dark"] .task-column,
+body[data-theme="dark"] .task-item,
+body[data-theme="dark"] .announcement-item,
+body[data-theme="dark"] .resource-item,
+body[data-theme="dark"] .schedule-day,
+body[data-theme="dark"] .overview-item,
+body[data-theme="dark"] .today-list li,
+body[data-theme="dark"] .schedule-slot,
+body[data-theme="dark"] .button,
+body[data-theme="dark"] .section-nav__button,
+body[data-theme="dark"] input,
+body[data-theme="dark"] select,
+body[data-theme="dark"] textarea,
+body[data-theme="dark"] .choice-pill span {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body[data-theme="dark"] .topbar,
+body[data-theme="dark"] .section-nav {
+  background: linear-gradient(145deg, rgba(38, 42, 47, 0.96), rgba(24, 27, 31, 0.98));
+}
+
+body[data-theme="dark"] .button,
+body[data-theme="dark"] .section-nav__button,
+body[data-theme="dark"] input,
+body[data-theme="dark"] select,
+body[data-theme="dark"] textarea,
+body[data-theme="dark"] .choice-pill span,
+body[data-theme="dark"] .task-column__count,
+body[data-theme="dark"] .task-checkbox span {
+  background: linear-gradient(145deg, rgba(45, 50, 56, 0.98), rgba(23, 26, 30, 0.98));
+  color: var(--text);
+}
+
+body[data-theme="dark"] .hero,
+body[data-theme="dark"] .card,
+body[data-theme="dark"] .user-badge,
+body[data-theme="dark"] .hero__stats article,
+body[data-theme="dark"] .hero__panel,
+body[data-theme="dark"] .task-column,
+body[data-theme="dark"] .task-item,
+body[data-theme="dark"] .announcement-item,
+body[data-theme="dark"] .resource-item,
+body[data-theme="dark"] .schedule-day,
+body[data-theme="dark"] .overview-item,
+body[data-theme="dark"] .today-list li,
+body[data-theme="dark"] .schedule-slot {
+  background: linear-gradient(145deg, rgba(42, 46, 52, 0.98), rgba(24, 27, 31, 0.98));
+}
+
+body[data-theme="dark"] .button--primary,
+body[data-theme="dark"] .section-nav__button.is-active {
+  color: #1f140d;
+}
+
+body[data-theme="dark"] .button--ghost {
+  background: linear-gradient(145deg, rgba(43, 47, 53, 0.94), rgba(25, 28, 32, 0.96));
+}
+
+body[data-theme="dark"] .message.is-success {
+  color: #a9e2ad;
+}
+
+body[data-theme="dark"] .message.is-error {
+  color: #ffaaa5;
 }
 
 .auth-layout .hero,
@@ -781,7 +877,8 @@ textarea {
   .task-board,
   .schedule-board,
   .schedule-filters,
-  .choice-grid {
+  .choice-grid,
+  .today-toolbar {
     grid-template-columns: 1fr;
   }
 

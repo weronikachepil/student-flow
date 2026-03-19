@@ -61,6 +61,16 @@ const WEEK_TARGET_OPTIONS = [
   { value: "numerator", label: "Чисельник" },
   { value: "denominator", label: "Знаменник" },
 ];
+const GROUP_FILTER_OPTIONS = [
+  { value: "all", label: "Уся група" },
+  { value: "group1", label: "Підгрупа 1" },
+  { value: "group2", label: "Підгрупа 2" },
+];
+const WEEK_FILTER_OPTIONS = [
+  { value: "both", label: "Будь-який тиждень" },
+  { value: "numerator", label: "Чисельник" },
+  { value: "denominator", label: "Знаменник" },
+];
 
 const SECTION_OPTIONS = [
   { id: "overview", label: "Головна" },
@@ -699,6 +709,19 @@ export default function HomePage() {
         </section>
       ) : (
         <section className="app-view">
+          <nav className="section-nav section-nav--top">
+            {SECTION_OPTIONS.map((section) => (
+              <button
+                key={section.id}
+                className={`section-nav__button ${activeSection === section.id ? "is-active" : ""}`}
+                onClick={() => setActiveSection(section.id)}
+                type="button"
+              >
+                {section.label}
+              </button>
+            ))}
+          </nav>
+
           <header className="hero">
             <div className="hero__content">
               <div className="topbar">
@@ -744,6 +767,28 @@ export default function HomePage() {
             <aside className="hero__panel">
               <p className="hero__panel-label">Сьогодні</p>
               <h2>{capitalize(todayLabel)}</h2>
+              <div className="today-toolbar">
+                <label className="today-toolbar__field">
+                  <span>Підгрупа</span>
+                  <select onChange={(event) => setGroupFilter(event.target.value)} value={groupFilter}>
+                    {GROUP_FILTER_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="today-toolbar__field">
+                  <span>Тиждень</span>
+                  <select onChange={(event) => setWeekFilter(event.target.value)} value={weekFilter}>
+                    {WEEK_FILTER_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
               <ul className="today-list">
                 {todaySchedule.length ? (
                   todaySchedule.map((entry) => (
@@ -751,7 +796,11 @@ export default function HomePage() {
                       <strong>
                         {entry.time_start} • {entry.subject}
                       </strong>
-                      <span>{entry.room ? `Аудиторія ${entry.room}` : "Без аудиторії"}</span>
+                      <span>
+                        {entry.room ? `Аудиторія ${entry.room}` : "Без аудиторії"} •{" "}
+                        {GROUP_LABELS[entry.group_label] || "Уся група"} •{" "}
+                        {WEEK_TYPE_LABELS[entry.week_type] || "Будь-який тиждень"}
+                      </span>
                     </li>
                   ))
                 ) : (
@@ -760,19 +809,6 @@ export default function HomePage() {
               </ul>
             </aside>
           </header>
-
-          <nav className="section-nav">
-            {SECTION_OPTIONS.map((section) => (
-              <button
-                key={section.id}
-                className={`section-nav__button ${activeSection === section.id ? "is-active" : ""}`}
-                onClick={() => setActiveSection(section.id)}
-                type="button"
-              >
-                {section.label}
-              </button>
-            ))}
-          </nav>
 
           {message ? <p className={`message ${isError ? "is-error" : "is-success"}`}>{message}</p> : null}
           {refreshing ? <p className="message">Оновлюю дані...</p> : null}
@@ -1188,17 +1224,21 @@ export default function HomePage() {
                     <label>
                       Підгрупа
                       <select onChange={(event) => setGroupFilter(event.target.value)} value={groupFilter}>
-                        <option value="all">Уся група</option>
-                        <option value="group1">Підгрупа 1</option>
-                        <option value="group2">Підгрупа 2</option>
+                        {GROUP_FILTER_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
                       </select>
                     </label>
                     <label>
                       Тиждень
                       <select onChange={(event) => setWeekFilter(event.target.value)} value={weekFilter}>
-                        <option value="both">Будь-який</option>
-                        <option value="numerator">Чисельник</option>
-                        <option value="denominator">Знаменник</option>
+                        {WEEK_FILTER_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
                       </select>
                     </label>
                   </div>
